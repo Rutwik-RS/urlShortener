@@ -1,8 +1,10 @@
 package com.example.projecturl.urlshortener.service;
+import com.example.projecturl.urlshortener.dto.AuthResponse;
 import com.example.projecturl.urlshortener.dto.LoginRequest;
 import com.example.projecturl.urlshortener.dto.RegisterRequest;
 import com.example.projecturl.urlshortener.entity.User;
 import com.example.projecturl.urlshortener.repository.UserRepository;
+import com.example.projecturl.urlshortener.security.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -12,10 +14,13 @@ import java.util.Optional;
 
 @Service
 public class AuthService {
+    private final JwtService jwtService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
     @Autowired
-    public AuthService(UserRepository userRepository,PasswordEncoder passwordEncoder){
+    public AuthService(JwtService jwtService, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -31,7 +36,7 @@ public class AuthService {
         userRepository.save(user);
         return "User Registered Successfully!";
     }
-    public String login(LoginRequest lreq)
+    public AuthResponse login(LoginRequest lreq)
     {
         Optional<User> optionalUser =  userRepository.findByEmail(lreq.getEmail());
         if(optionalUser.isPresent())
@@ -39,9 +44,9 @@ public class AuthService {
             User user = optionalUser.get();
             if(passwordEncoder.matches(lreq.getPassword(),user.getPassword()))
             {
-                return "Login Successfull!";
+                return new AuthResponse(jwtService.generateToken(user.getEmail()));
             }
         }
-        return "Invalid Email or Password";
+         throw new RuntimeException("Invalid Email or Password");
     }
 }

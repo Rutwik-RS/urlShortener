@@ -1,4 +1,5 @@
 package com.example.projecturl.urlshortener.controller;
+import com.example.projecturl.urlshortener.dto.AuthResponse;
 import com.example.projecturl.urlshortener.dto.LoginRequest;
 import com.example.projecturl.urlshortener.dto.RegisterRequest;
 import com.example.projecturl.urlshortener.service.AuthService;
@@ -22,7 +23,7 @@ public class AuthController {
         return authservice.register(req);
     }
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest lreq)
+    public AuthResponse login(@RequestBody LoginRequest lreq)
     {
         return authservice.login(lreq);
     }
