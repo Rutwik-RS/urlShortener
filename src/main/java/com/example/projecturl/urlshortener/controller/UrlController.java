@@ -3,10 +3,13 @@ package com.example.projecturl.urlshortener.controller;
 import com.example.projecturl.urlshortener.dto.UpdateUrlRequest;
 import com.example.projecturl.urlshortener.dto.UrlRequest;
 import com.example.projecturl.urlshortener.dto.UrlResponse;
+import com.example.projecturl.urlshortener.dto.dashboardResponse;
 import com.example.projecturl.urlshortener.entity.Url;
 import com.example.projecturl.urlshortener.repository.UrlRepository;
 import com.example.projecturl.urlshortener.service.UrlService;
+import jakarta.validation.Valid;
 import org.apache.coyote.Response;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -27,15 +30,15 @@ public class UrlController {
     }
 
     @PostMapping("/create")
-    public UrlResponse createShortUrl(@RequestBody UrlRequest req,
+    public UrlResponse createShortUrl(@Valid @RequestBody UrlRequest req,
                                       Authentication authentication)
     {
         return urlService.createShortUrl(req, authentication.getName());
     }
     @GetMapping("/my-urls")
-    public List<UrlResponse> getAllUrls(Authentication authentication)
+    public Page<UrlResponse> getAllUrls(Authentication authentication, @RequestParam(defaultValue = "0") int page,@RequestParam (defaultValue = "5") int size)
     {
-        return urlService.getMyUrls(authentication.getName());
+        return urlService.getMyUrls(authentication.getName(),page,size);
     }
 
     @DeleteMapping("/{id}")
@@ -52,7 +55,9 @@ public class UrlController {
         return ResponseEntity.ok(response);
     }
 
-
-
+    @GetMapping("/dashboard")
+    public dashboardResponse getDashBoard(Authentication authentication){
+        return urlService.getDashBoard(authentication.getName());
+    }
 
 }

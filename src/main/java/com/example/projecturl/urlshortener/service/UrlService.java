@@ -4,17 +4,22 @@ package com.example.projecturl.urlshortener.service;
 import com.example.projecturl.urlshortener.dto.UpdateUrlRequest;
 import com.example.projecturl.urlshortener.dto.UrlRequest;
 import com.example.projecturl.urlshortener.dto.UrlResponse;
+import com.example.projecturl.urlshortener.dto.dashboardResponse;
 import com.example.projecturl.urlshortener.entity.Url;
 import com.example.projecturl.urlshortener.entity.User;
 import com.example.projecturl.urlshortener.repository.UrlRepository;
 import com.example.projecturl.urlshortener.repository.UserRepository;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -103,18 +108,27 @@ public class UrlService {
                 url.getUser().getUsername()
         );
     }
-    public   List<UrlResponse> getMyUrls(String email)
+    public Page<UrlResponse> getMyUrls(String email,int page , int size)
     {
         User user = userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("User not found!"));
-        List<Url> urls = urlRepository.findByUser(user);
-        return urls.stream()
-                .map(this::mapToResponse)
-                .toList();
+        Pageable pageable = PageRequest.of(page,size);
+        Page<Url> urls = urlRepository.findByUser(user,pageable);
+        return urls.map(this::mapToResponse);
     }
     public void deleteUrl(Long id,String email)
     {
-        User user= userRepository.findByEmail(email).orElseThrow(()->new RuntimeException(("User not found!")));
-        Url url = urlRepository.findById(id).orElseThrow(()->new RuntimeException(("Url not found!")));
+        User user= userRepository.findByEmail(email).orElseThrow(() ->
+                new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found!"
+                )
+        );
+        Url url = urlRepository.findById(id).orElseThrow(() ->
+                new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Url not found!"
+                )
+        );
         if(!Objects.equals(url.getUser().getId(), user.getId()))
         {
             throw new RuntimeException("You are not allowed to delete this url!");
@@ -140,11 +154,30 @@ public class UrlService {
         return mapToResponse(updatedUrl);
     }
 
-    public void getDashBoard(String email){
+    public dashboardResponse getDashBoard(String email){
         User user = userRepository.findByEmail(email).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found"));
         List<Url> urls = urlRepository.findByUser(user);
         long total  = urls.size();
         long activeUrls  = urls.stream().filter(Url::isActive).count();
         long expiredUrls =  urls.stream().filter(url-> url.getExpiresAt()!=null && url.getExpiresAt().isBefore(LocalDateTime.now())).count();
+        long totalClicks = urls.stream().mapToLong(Url::getClickCount).sum();
+        Url mostClicked = urls.stream()
+                .max(Comparator.comparingLong(Url::getClickCount))
+                .orElse(null);
+        long mostClickedCount =0;
+        String mostClickedUrl=null;
+        if (mostClicked != null && mostClicked.getClickCount() > 0) {
+            mostClickedCount = mostClicked.getClickCount();
+            mostClickedUrl = mostClicked.getOriginalUrl();
+        }
+
+        return new dashboardResponse(
+                total,
+                activeUrls,
+                expiredUrls,
+                totalClicks,
+                mostClickedUrl,
+                mostClickedCount
+        );
     }
 }

@@ -1,9 +1,17 @@
 package com.example.projecturl.urlshortener.dto;
 
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.Pattern;
+
 import java.time.LocalDateTime;
 
 public class UpdateUrlRequest {
+    @Pattern(
+            regexp = "^(https?://).+",
+            message = "URL must start with http:// or https://"
+    )
     private String originalUrl;
+    @Future(message = "Expiry date must be in the future")
     private LocalDateTime expiresAt;
 
     public String getOriginalUrl() {

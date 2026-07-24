@@ -4,15 +4,15 @@ public class dashboardResponse {
     private long totalUrls;
     private long activeUrls;
     private long expiredUrls;
-    private long totalCLicks;
+    private long totalClicks;
     private String mostClickedUrl;
     private long mostClickCount;
 
-    public dashboardResponse(long totalUrls, long activeUrls, long expiredUrls, long totalCLicks, String mostClickedUrl, long mostClickCount) {
+    public dashboardResponse(long totalUrls, long activeUrls, long expiredUrls, long totalClicks, String mostClickedUrl, long mostClickCount) {
         this.totalUrls = totalUrls;
         this.activeUrls = activeUrls;
         this.expiredUrls = expiredUrls;
-        this.totalCLicks = totalCLicks;
+        this.totalClicks = totalClicks;
         this.mostClickedUrl = mostClickedUrl;
         this.mostClickCount = mostClickCount;
     }
@@ -44,12 +44,12 @@ public class dashboardResponse {
         this.expiredUrls = expiredUrls;
     }
 
-    public long getTotalCLicks() {
-        return totalCLicks;
+    public long gettotalClicks() {
+        return totalClicks;
     }
 
-    public void setTotalCLicks(long totalCLicks) {
-        this.totalCLicks = totalCLicks;
+    public void settotalClicks(long totalClicks) {
+        this.totalClicks = totalClicks;
     }
 
     public String getMostClickedUrl() {
@@ -74,7 +74,7 @@ public class dashboardResponse {
                 "totalUrls=" + totalUrls +
                 ", activeUrls=" + activeUrls +
                 ", expiredUrls=" + expiredUrls +
-                ", totalCLicks=" + totalCLicks +
+                ", totalClicks=" + totalClicks +
                 ", mostClickedUrl='" + mostClickedUrl + '\'' +
                 ", mostClickCount=" + mostClickCount +
                 '}';
